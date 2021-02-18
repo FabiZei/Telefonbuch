@@ -85,10 +85,10 @@ struct Personen personausSQL(int index)
 		 p.tnummer.vorwahl = sqlite3_column_int(res, 7);
 		 
 		 p.id = sqlite3_column_int(res, 8);
-		 printf("%d	", p.id); 
+		 //printf("%d	", p.id); 
 		 
 	} else {
-		printf("Fehlgeschlagen!\n");
+		//printf("Fehlgeschlagen!\n");
 		p.id = -1;
 		return p;
 	}
@@ -118,6 +118,8 @@ struct Personen personausSQL(int index)
 		p.tnummer.nummer = -1;        
 		return p;
 	}
+	
+	//printf("%d", p.id);
 	
 	
 	
@@ -170,31 +172,82 @@ void fillArraywithData(struct Personen *feld)
 {
 	for (int i = 0; i < 6; i++) {
 		feld[i] = personausSQL(i+1);
-		printf("%s \n", feld[i].adresse.ortsname);
 	}
 	
 	
-	//feld[2] = personausSQL(2);
-	//printf("%d", feld[2].id);
+	//printf("%d\n", feld[1].id);
+}
+
+int scrollArray(int richtung, struct Personen *feld)  //richtung: 1 nach 'unten'/ -1 nach open
+{
+	int scrollLock = getColumns();
+	int currentIndex = feld[0].id;
+	
+	if (richtung == -1) {
+		if ((feld[0].id + richtung * 6) < 0) {
+			
+			feld[0] = personausSQL(1);
+			feld[1] = personausSQL(2);
+			feld[2] = personausSQL(3);
+			feld[3] = personausSQL(4);
+			feld[4] = personausSQL(5);
+			feld[5] = personausSQL(6);
+			
+		} else {
+			for (int i = 0; i < 6; i++) {
+				feld[i] = personausSQL(currentIndex - 6 + i);
+			}
+		}
+	}
+	
+	if (richtung == 1) {
+		if ((feld[5].id + 6) >= scrollLock) {
+			
+			feld[0] = personausSQL(scrollLock - 5);
+			feld[1] = personausSQL(scrollLock - 4);
+			feld[2] = personausSQL(scrollLock - 3);
+			feld[3] = personausSQL(scrollLock - 2);
+			feld[4] = personausSQL(scrollLock - 1);
+			feld[5] = personausSQL(scrollLock);
+			
+		} else {
+			for (int i = 0; i < 6; i++) {
+				feld[i] = personausSQL(currentIndex + 6 + i);
+			}
+		}
+	}
+	
+	if ((richtung != 1)&&(richtung != -1)) {
+		printf("Bitte als Richtung nur -1 oder 1 angeben -.-");
+	}
+	
+
+	
+	return 0;
 }
 
 int main()
 {
 	
 	struct Personen array[6];
-	//struct Personen jalla;
-	//jalla = personausSQL(12);
 	
-	//struct Personen parray;
-	//parray = array;
+	
 	
 	fillArraywithData(array);
 	
+	//printf("%d", array[1].id);
 	
-	//printf("%d", jalla.tnummer.vorwahl);
-	//printf("	%d", getColumns());
-
-	//printf("%s\n", pers.vorname);
+	
+	for (int i = 0; i < 100; i ++) {
+		scrollArray(1, array);
+		printf(("%d\n"),array[5].id);
+	}
+	
+	for (int i = 0; i < 100; i ++) {
+		scrollArray(-1, array);
+		printf(("%d\n"),array[5].id);
+	}
+	
 
 	
 	return 0;
