@@ -1,37 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sqlite3.h>
-#include <windows.h>
-
-static int callback(void *, int, char **, char **);
-struct Personen personausSQL(int index);
-int findIndex(int *feld, int size, int target);
-
-int columns;
-int *pcolumns = &columns;
-
-struct Adresse{
-	char ortsname[40];
-	char strassenname[40];
-	int plz;
-	int hausnummer;
-} ;
-
-struct Telefonnummer{
-	int vorwahl;
-	int nummer;
-};
-
-struct Personen{
-	int id;
-	char vorname[20];
-    char nachname[20];
-   	struct Adresse adresse;
-    struct Telefonnummer tnummer;
-    char geburtsdatum[10];
-};
-
+#include "SQLIntegration.h"
 
 struct Personen personausSQL(int index)
 {
@@ -183,7 +150,7 @@ void fillArraywithData(struct Personen *feld)
 	//printf("%d\n", feld[1].id);
 }
 
-int scrollArray(int richtung, struct Personen *feld)  //richtung: 1 nach 'unten'/ -1 nach open
+int scrollArray(int richtung, struct Personen *feld)  //richtung: 1 nach unten/ -1 nach oben
 {
 	int scrollLock = getColumns();
 	int currentIndex = feld[0].id;
@@ -442,21 +409,11 @@ void scrollThroughIDArray(int richtung, struct Personen *feld, int idArrayLength
 
 int main()
 {
-	
+	struct Personen p = personausSQL(1);
+	printf("%d", p.id);
 	return 0;
 }
 
-static int callback(void *none, int collumint, char **collumtext, char **collumname)
-{
-	
-    int i;
-    for (i = 0; i < collumint; i++) //geht durch alle Reihen aus dem Ergebnis der query durch
-    {
-        printf("%s = %s\n", collumname[i], collumtext[i] ? collumtext[i] : "NULL"); //printet eine Reihe mit allen Inhalten
-    	printf("\n");
-	}
-    return 0;
-}
 
 int findIndex(int *feld, int size, int target)
 {
