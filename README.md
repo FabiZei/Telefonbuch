@@ -7,8 +7,8 @@ Wie soll es Umgesetzt werden?
 *	UI in Konsole
 
 Funktionsweise
-*	Erstellen von Adressbucheinträgen
-*	Editieren von Adressbucheinträgen
+*	~~Erstellen von Adressbucheinträgen~~
+*	~~Editieren von Adressbucheinträgen~~
 *	Suchen von Adressbucheinträgen
-*	Löschen von Adressbucheinträgen
+*	~~Löschen von Adressbucheinträgen~~
 *	Arbeiten über SQL-Queries aus C heraus
