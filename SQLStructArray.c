@@ -1,10 +1,12 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <sqlite3.h>
 #include <windows.h>
 
 static int callback(void *, int, char **, char **);
 struct Personen personausSQL(int index);
+int findIndex(int *feld, int size, int target);
 
 int columns;
 int *pcolumns = &columns;
@@ -98,7 +100,9 @@ struct Personen personausSQL(int index)
 	rc = sqlite3_prepare_v2(db, sql2, -1, &res2, 0);
 	
 	if (rc == SQLITE_OK) {
+		
 		sqlite3_bind_int(res2, 1, index);
+		
 	} else {
 		fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
 		
@@ -110,7 +114,7 @@ struct Personen personausSQL(int index)
 	
 	if (step2 == SQLITE_ROW) {   
 		
-		p.tnummer.nummer = sqlite3_column_int(res, 0);
+		p.tnummer.nummer = sqlite3_column_int(res, 0); //kümmer dich noch
 		
 	} else {
 		//printf("Laden der Daten fehlgeschlagen!\n");
@@ -226,29 +230,274 @@ int scrollArray(int richtung, struct Personen *feld)  //richtung: 1 nach 'unten'
 	return 0;
 }
 
-int main()
+int getIDArrayLength(int suchanfrage, char suchanfrage_char[20]) //gibt die Zeilenzahl der Ergebnisse einer Suche an
 {
 	
-	struct Personen array[6];
+	sqlite3 *db;
+	char *err_msg = 0;
+	sqlite3_stmt *res;
+	int counterReturns;
 	
+	int rc = sqlite3_open("Test.db", &db);
 	
+	if (rc != SQLITE_OK) {
+		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+		sqlite3_close(db);
 	
-	fillArraywithData(array);
+		return 0;
+	} 
 	
-	//printf("%d", array[1].id);
-	
-	
-	for (int i = 0; i < 100; i ++) {
-		scrollArray(1, array);
-		printf(("%d\n"),array[5].id);
+	if (suchanfrage == 1) {
+		
+		char *sql = "select count(distinct Personen.PID) from Personen, Adresse, Telefonnummer where Personen.AID = Adresse.AID and Personen.PID = Telefonnummer.PID and Personen.Vorname Like ?;";
+		
+		rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
+		
+		if (rc == SQLITE_OK) {
+			rc = sqlite3_bind_text(res, 1, suchanfrage_char, -1, 0);
+		} else {
+			fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
+		}
+		
+		if (sqlite3_step(res) == SQLITE_ROW) {
+			counterReturns = sqlite3_column_int(res, 0);
+		}
+		
+		sqlite3_finalize(res);
+		//sqlite3_close(db);
+		
+		return counterReturns;
 	}
 	
-	for (int i = 0; i < 100; i ++) {
-		scrollArray(-1, array);
-		printf(("%d\n"),array[5].id);
+	if (suchanfrage == 2) {
+		
+		char *sql = "select count(distinct Personen.PID) from Personen, Adresse, Telefonnummer where Personen.AID = Adresse.AID and Personen.PID = Telefonnummer.PID and Personen.Nachname Like ?;";
+		
+		rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
+		
+		if (rc == SQLITE_OK) {
+			rc = sqlite3_bind_text(res, 1, suchanfrage_char, -1, 0);
+		} else {
+			fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
+		}
+		
+		if (sqlite3_step(res) == SQLITE_ROW) {
+			counterReturns = sqlite3_column_int(res, 0);
+		}
+		
+		sqlite3_finalize(res);
+		//sqlite3_close(db);
+		
+		return counterReturns;
 	}
 	
+	if (suchanfrage == 3) {
+		
+		char *sql = "select count(distinct Telefonnummer.TID) from Personen, Adresse, Telefonnummer where Personen.AID = Adresse.AID and Personen.PID = Telefonnummer.PID and Telefonnummer.nummer like ?;";
+		
+		rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
+		
+		if (rc == SQLITE_OK) {
+			rc = sqlite3_bind_text(res, 1, suchanfrage_char, -1, 0);
+		} else {
+			fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
+		}
+		
+		if (sqlite3_step(res) == SQLITE_ROW) {
+			counterReturns = sqlite3_column_int(res, 0);
+		}
+		
+		sqlite3_finalize(res);
+		//sqlite3_close(db);
+		
+		return counterReturns;
+	}
+}
 
+void getIDArray(int suchanfrage, char suchanfrage_char[20], int* feld) // 1 für Vornamen, 2 für Nachnamen, 3 für Telefonnummern
+{ 
+	sqlite3 *db;
+	char *err_msg = 0;
+	sqlite3_stmt *res;
+	char *sql;
+	
+	
+	int rc = sqlite3_open("Test.db", &db);
+	
+	if (rc != SQLITE_OK) {
+		
+		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+		sqlite3_close(db);
+	
+	}
+	
+		
+	if (suchanfrage == 1) {
+		
+		sql = "select distinct Personen.PID from Personen, Adresse, Telefonnummer where Personen.AID = Adresse.AID and Personen.PID = Telefonnummer.PID and Personen.Vorname Like ?;";
+		
+	} 
+	
+	if (suchanfrage == 2) {
+		
+		sql = "select distinct Personen.PID from Personen, Adresse, Telefonnummer where Personen.AID = Adresse.AID and Personen.PID = Telefonnummer.PID and Personen.Nachname Like ?;";
+		
+	} 
+	
+	if (suchanfrage == 3) {
+		
+		sql = "select Personen.PID from Personen, Adresse, Telefonnummer where Personen.AID = Adresse.AID and Personen.PID = Telefonnummer.PID and Telefonnummer.Nummer Like ?;";
+		
+	} 
+	
+	
+	rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
+		
+	if (rc == SQLITE_OK) {
+		rc = sqlite3_bind_text(res, 1, suchanfrage_char, -1, 0);
+		
+	} else {
+		fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
+	}
+	
+	int step = sqlite3_step(res);
+	
+		
+	int i = 0;
+	while (step == SQLITE_ROW) {
+		feld[i] = sqlite3_column_int(res, 0);
+		i++;
+		step = sqlite3_step(res);
+	}	
+		
+	sqlite3_finalize(res);
+	sqlite3_close(db);
+}
+
+void fillArraywithDatav2(struct Personen *feld, int idArrayLength, int *idArray)
+{
+	if (idArrayLength >= 6) {
+		for (int i = 0; i < 6; i++){
+			feld[i] = personausSQL(idArray[i]);
+		}
+	} else {
+		for (int i = 0; i < idArrayLength; i++) {
+			feld[i] = personausSQL(idArray[i]);
+		}
+		
+		for (int i = 6; i >= idArrayLength; i--) {
+			feld[i].id = -1;
+		}
+	}
+	
+}
+
+void scrollThroughIDArray(int richtung, struct Personen *feld, int idArrayLength, int *idArray) 
+{
+	int currentidArrayIndex = findIndex(idArray, idArrayLength, idArray[0]);
+	
+	if ((richtung != 1)&&(richtung != -1)) {
+		printf("Bitte als Richtung nur -1 oder 1 angeben -.-");
+	}
+	
+	if (idArrayLength > 6) {
+			if (richtung == -1) {
+				if ((currentidArrayIndex + richtung * 6) < 0) {
+					
+					feld[0] = personausSQL(idArray[0]);
+					feld[1] = personausSQL(idArray[1]);
+					feld[2] = personausSQL(idArray[2]);
+					feld[3] = personausSQL(idArray[3]);
+					feld[4] = personausSQL(idArray[4]);
+					feld[5] = personausSQL(idArray[5]);
+					
+				} else {
+					for (int i = 0; i < 6; i++) {
+						feld[i] = personausSQL(idArray[currentidArrayIndex - 6 + i]);
+					}
+				}
+			}
+			
+			if (richtung == 1) {
+				if ((findIndex(idArray, idArrayLength, feld[5].id) + 6) >= idArrayLength) {
+					
+					feld[0] = personausSQL(idArrayLength - 6);
+					feld[1] = personausSQL(idArrayLength - 5);
+					feld[2] = personausSQL(idArrayLength - 4);
+					feld[3] = personausSQL(idArrayLength - 3);
+					feld[4] = personausSQL(idArrayLength - 2);
+					feld[5] = personausSQL(idArrayLength - 1);
+					
+				} else {
+					for (int i = 0; i < 6; i++) {
+						feld[i] = personausSQL(idArray[currentidArrayIndex + 6 + i]);
+					}
+				}
+			}
+	}
+
+}
+
+
+int main()
+{
+	int suchanfrage = 1;
+	char suche[20] = "%a%";
+	struct Personen feld[6];
+	
+	//printf("%d\n",getIDArrayLength(suchanfrage, suche));
+	
+	int array[getIDArrayLength(suchanfrage, suche)];
+	getIDArray(suchanfrage, suche, array);
+	
+	fillArraywithDatav2(feld, getIDArrayLength(suchanfrage, suche), array);
+	
+	for (int i = 0; i < 6; i++) {
+		printf("%d\n", feld[i].id);
+	}
+	
+	scrollThroughIDArray(1, feld, getIDArrayLength(suchanfrage, suche), array);
+	
+	for (int i = 0; i < 50; i++){
+		scrollThroughIDArray(1, feld, getIDArrayLength(suchanfrage, suche), array);
+		
+		for (int i = 0; i < 6; i++) {
+			printf("%d\n", feld[i].id);
+		}
+	}
+	
+	for (int i = 0; i < 50; i++){
+		scrollThroughIDArray(-1, feld, getIDArrayLength(suchanfrage, suche), array);
+		
+		for (int i = 0; i < 6; i++) {
+			printf("%d\n", feld[i].id);
+		}
+	}
+	
+	
 	
 	return 0;
+}
+
+static int callback(void *none, int collumint, char **collumtext, char **collumname)
+{
+	
+    int i;
+    for (i = 0; i < collumint; i++) //geht durch alle Reihen aus dem Ergebnis der query durch
+    {
+        printf("%s = %s\n", collumname[i], collumtext[i] ? collumtext[i] : "NULL"); //printet eine Reihe mit allen Inhalten
+    	printf("\n");
+	}
+    return 0;
+}
+
+int findIndex(int *feld, int size, int target)
+{
+	int i = 0;
+	
+	while((i < size) && (feld[i] != target)){
+		i++;
+	}
+	
+	return i;
 }
