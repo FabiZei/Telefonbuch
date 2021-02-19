@@ -73,21 +73,19 @@ struct Personen personausSQL(int index)
 	} else {
 		fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
 		
-		p.tnummer.nummer = -1;        
+		p.tnummer.nummer = -2;        
 		return p;
 	}
 	
 	int step2 = sqlite3_step(res2);
-	//step2 = sqlite3_step(res2);
 	
 	if (step2 == SQLITE_ROW) {   
 	
 		p.tnummer.nummer = sqlite3_column_int(res2, 0); 
 		
 	} else {
-		printf("Laden der Daten fehlgeschlagen!\n");
 		
-		p.tnummer.nummer = -1;        
+		p.tnummer.nummer = -2;        
 		return p;
 	}
 	
@@ -389,12 +387,12 @@ void scrollThroughIDArray(int richtung, struct Personen *feld, int idArrayLength
 			if (richtung == 1) {
 				if ((findIndex(idArray, idArrayLength, feld[5].id) + 6) >= idArrayLength) {
 					
-					feld[0] = personausSQL(idArrayLength - 6);
-					feld[1] = personausSQL(idArrayLength - 5);
-					feld[2] = personausSQL(idArrayLength - 4);
-					feld[3] = personausSQL(idArrayLength - 3);
-					feld[4] = personausSQL(idArrayLength - 2);
-					feld[5] = personausSQL(idArrayLength - 1);
+					feld[0] = personausSQL(idArray[idArrayLength - 6]);
+					feld[1] = personausSQL(idArray[idArrayLength - 5]);
+					feld[2] = personausSQL(idArray[idArrayLength - 4]);
+					feld[3] = personausSQL(idArray[idArrayLength - 3]);
+					feld[4] = personausSQL(idArray[idArrayLength - 2]);
+					feld[5] = personausSQL(idArray[idArrayLength - 1]);
 					
 				} else {
 					for (int i = 0; i < 6; i++) {
@@ -405,15 +403,6 @@ void scrollThroughIDArray(int richtung, struct Personen *feld, int idArrayLength
 	}
 
 }
-
-
-int main()
-{
-	struct Personen p = personausSQL(1);
-	printf("%d", p.id);
-	return 0;
-}
-
 
 int findIndex(int *feld, int size, int target)
 {

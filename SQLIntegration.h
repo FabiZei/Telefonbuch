@@ -1,6 +1,3 @@
-#ifndef sqlintegration_NEVER_USE
-#define sqlintegration_NEVER_USE
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -46,4 +43,4 @@ void scrollThroughIDArray(int richtung, struct Personen *feld, int idArrayLength
 
 int findIndex(int *feld, int size, int target);
 
-#endif
+
