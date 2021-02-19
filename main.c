@@ -64,7 +64,7 @@ int searchmenue()
 
     while (1)
     {
-        strcpy(suchterm, "");
+        strcpy(suchterm, "%");
         strcpy(temp, "");
         showsearch();
         scanf("%s", eingabe);
