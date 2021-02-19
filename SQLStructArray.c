@@ -53,7 +53,7 @@ struct Personen personausSQL(int index)
         return p;
 	}
 	
-	char *sql = "Select Vorname, Nachname, Geburtsdatum, Ortsname, Strassenname, Hausnummer, PLZ, Vorwahl, Personen.PID from Personen, Adresse, Telefonnummer where Adresse.AID = Personen.AID and Personen.PID = ? LIMIT 1;";
+	char *sql = "Select Vorname, Nachname, date(Geburtsdatum), Ortsname, Strassenname, Hausnummer, PLZ, Vorwahl, Personen.PID from Personen, Adresse, Telefonnummer where Adresse.AID = Personen.AID and Personen.PID = ? LIMIT 1;";
 	
 	rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
 	
@@ -95,7 +95,7 @@ struct Personen personausSQL(int index)
 		return p;
 	}
 	
-	char *sql2 = "select Personen.PID, Nummer from Telefonnummer, Personen where Personen.PID = Telefonnummer.PID and Personen.PID = ? limit 1;";
+	char *sql2 = "select Nummer, Personen.PID from Telefonnummer, Personen where Personen.PID = Telefonnummer.PID and Telefonnummer.PID = ? limit 1;";
 	
 	rc = sqlite3_prepare_v2(db, sql2, -1, &res2, 0);
 	
@@ -111,13 +111,14 @@ struct Personen personausSQL(int index)
 	}
 	
 	int step2 = sqlite3_step(res2);
+	//step2 = sqlite3_step(res2);
 	
 	if (step2 == SQLITE_ROW) {   
-		
-		p.tnummer.nummer = sqlite3_column_int(res, 0); //kümmer dich noch
+	
+		p.tnummer.nummer = sqlite3_column_int(res2, 0); 
 		
 	} else {
-		//printf("Laden der Daten fehlgeschlagen!\n");
+		printf("Laden der Daten fehlgeschlagen!\n");
 		
 		p.tnummer.nummer = -1;        
 		return p;
@@ -441,40 +442,6 @@ void scrollThroughIDArray(int richtung, struct Personen *feld, int idArrayLength
 
 int main()
 {
-	int suchanfrage = 1;
-	char suche[20] = "%a%";
-	struct Personen feld[6];
-	
-	//printf("%d\n",getIDArrayLength(suchanfrage, suche));
-	
-	int array[getIDArrayLength(suchanfrage, suche)];
-	getIDArray(suchanfrage, suche, array);
-	
-	fillArraywithDatav2(feld, getIDArrayLength(suchanfrage, suche), array);
-	
-	for (int i = 0; i < 6; i++) {
-		printf("%d\n", feld[i].id);
-	}
-	
-	scrollThroughIDArray(1, feld, getIDArrayLength(suchanfrage, suche), array);
-	
-	for (int i = 0; i < 50; i++){
-		scrollThroughIDArray(1, feld, getIDArrayLength(suchanfrage, suche), array);
-		
-		for (int i = 0; i < 6; i++) {
-			printf("%d\n", feld[i].id);
-		}
-	}
-	
-	for (int i = 0; i < 50; i++){
-		scrollThroughIDArray(-1, feld, getIDArrayLength(suchanfrage, suche), array);
-		
-		for (int i = 0; i < 6; i++) {
-			printf("%d\n", feld[i].id);
-		}
-	}
-	
-	
 	
 	return 0;
 }
